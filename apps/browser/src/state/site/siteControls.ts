@@ -40,8 +40,11 @@ export function featuredPermissions(tabId: string, settings: SiteSettings, list:
 
 export type SiteSound = { siteMuted: boolean; soundBlocked: boolean };
 
+const autoplayBlockedByDefault = (type: SiteSettingType, settings: SiteSettings | null) =>
+  type === "autoplay" && !!settings?.autoplay?.isDefault && useBrowser.getState().settings.blockAutoplayEverywhere;
+
 export const permissionValue = (type: SiteSettingType, settings: SiteSettings | null, sound: SiteSound): SiteSettingValue | undefined =>
-  type === "sound" ? (sound.siteMuted || sound.soundBlocked ? "block" : "allow") : settings?.[type]?.value;
+  type === "sound" ? (sound.siteMuted || sound.soundBlocked ? "block" : "allow") : autoplayBlockedByDefault(type, settings) ? "block" : settings?.[type]?.value;
 
 export async function setSitePermission(
   page: { tabId: string; profile: string; origin: string; engine: PageEngine },

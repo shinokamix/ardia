@@ -95,6 +95,7 @@ const TOP = [
   ["minimal", ["appearance.minimalismMode"]],
   ["minimalism", ["appearance.minimalismMode"]],
   ["mouse wheel", ["privacy.commandScrollZoom"]],
+  ["autoplay", ["privacy.blockAutoplayEverywhere"]],
   ["1password", ["passwords.managerApps"]],
   ["warn quitting", ["general.warnBeforeQuitting"]],
   ["trakers", ["privacy.blockTrackers"]],

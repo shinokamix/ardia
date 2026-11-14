@@ -25,6 +25,7 @@ export const privacyRows = {
           description: "Pop-ups, camera, location, notifications and other permissions you've set for sites.",
           keywords: ["camera", "microphone", "location", "popups", "cookies", "javascript", "clear site data", "website settings"],
         },
+        blockAutoplayEverywhere: { title: "Block autoplay on every site", description: "Sites you set to Allow in Site Controls still autoplay. A click on a player always plays. Applies to pages you open or reload.", keywords: ["autoplay", "auto play", "videos playing", "stop videos", "media autoplay", "muted autoplay"] },
       },
     },
     { section: "Apps allowed to open links", rows: { appLinks: { advanced: true, title: "Apps allowed to open links", description: "Sites that open another app without asking first.", keywords: ["external apps", "protocol handlers", "zoom links"] } } },
