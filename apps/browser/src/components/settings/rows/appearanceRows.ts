@@ -67,6 +67,11 @@ export const appearanceRows = {
           description: "A 28 pt toolbar instead of Dia's 41 pt, so the page gets more height and a 16:9 video can fill a maximized window. For the address bar in the toolbar and for tabs at the top.",
           keywords: ["toolbar height", "smaller toolbar", "thin toolbar", "slim", "dense", "helium", "video", "16:9", "black bars", "url bar"],
         },
+        showTranslateButton: {
+          title: "Show Translate button",
+          description: "The button in the address bar on a page in a language you don't read. Off, translate a page, or show its original, from Site Controls.",
+          keywords: ["translate", "translation", "translate button", "hide translate", "language", "foreign language", "url bar", "address bar"],
+        },
       },
     },
     {
