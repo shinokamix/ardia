@@ -184,6 +184,11 @@ export const generalRows = {
           description: "A Top App's tile shows a speaker while its tab plays or is muted, a mark while it is in Picture in Picture, and its unread count when unread counts are on. Off, as in Dia, a tile shows only the site's icon.",
           keywords: ["pinned tiles", "favorites", "badges", "indicators", "unread count", "speaker", "audio", "muted", "playing", "clean", "dia"],
         },
+        showTabHoverCards: {
+          title: "Show tab cards on hover",
+          description: "Resting the pointer on a tab, a pinned tab or a Top App shows a card with its page and quick actions. Off, nothing pops up; the same actions are in the tab's right-click menu. Folder and group previews still show.",
+          keywords: ["hover", "hover card", "card", "popup", "pop-up", "popover", "preview", "tooltip", "tab preview", "top apps", "pinned tiles"],
+        },
         fadeUnloadedTabs: {
           advanced: true,
           title: "Fade icons of unloaded tabs",

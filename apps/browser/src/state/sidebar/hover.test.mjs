@@ -289,3 +289,28 @@ test("a sidebar sliding away or docking raises no card, and a card asked for jus
     slide(false);
   }
 });
+
+test("with tab cards off, a tab's card never shows while a group's preview still does, and turning them off takes a shown card down", async (t) => {
+  fresh(t);
+  const settings = (patch) => useBrowser.getState().updateSettings(patch);
+  await cardFor(t, "a");
+  settings({ showTabHoverCards: false });
+  assert.equal(shown(), null, "the shown card goes in the same tick");
+  enter("b");
+  t.mock.timers.tick(1000);
+  await settle();
+  assert.equal(shown(), null, "a tab row raises no card");
+  hover.rowShown(W, { kind: "group", id: "c" });
+  t.mock.timers.tick(500);
+  await settle();
+  assert.equal(sidebarUi().hover?.kind, "group", "a group header's preview still opens");
+  hover.dismissHover();
+  settings({ showTabHoverCards: true });
+  enter("a");
+  t.mock.timers.tick(499);
+  settings({ showTabHoverCards: false });
+  t.mock.timers.tick(1);
+  await settle();
+  assert.equal(shown(), null, "a card waiting to show when they're turned off never lands");
+  settings({ showTabHoverCards: true });
+});

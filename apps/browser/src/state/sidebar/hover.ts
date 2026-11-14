@@ -1,4 +1,5 @@
 import { hoverHeld } from "../app/transientUi";
+import { useBrowser } from "../browser/store";
 import { sidebarSliding } from "../windows/dockMotion";
 import { cardReach, pointInRect, type Point, type Rect } from "./hoverAim";
 import { measureRow, setSidebarUi, sidebarUi, type Target } from "./sidebarUi";
@@ -17,6 +18,7 @@ let underPointer: string | null = null;
 let suppressed = false;
 let ticket = 0;
 
+const cardAllowed = (target: Target) => target.kind !== "tab" || useBrowser.getState().settings.showTabHoverCards;
 const stop = (...kinds: (keyof typeof timers)[]) => kinds.forEach((kind) => clearTimeout(timers[kind]));
 const start = (kind: keyof typeof timers, run: () => void) => void (timers[kind] = setTimeout(run, DELAY_MS[kind]));
 const isShown = (windowId: string, id: string | undefined) => {
@@ -116,7 +118,7 @@ export function suppressHover(value: boolean) {
 
 async function show(windowId: string, target: Target, mine: number) {
   const anchor = await measureRow(windowId, target.id);
-  if (mine !== ticket || suppressed || !anchor || hoverHeld(windowId) || sidebarSliding(windowId)) return;
+  if (mine !== ticket || suppressed || !anchor || !cardAllowed(target) || hoverHeld(windowId) || sidebarSliding(windowId)) return;
   if (card.pointerOn && sidebarUi().hover) return;
   card.exit = null;
   setSidebarUi({ hover: { windowId, ...target, anchor } });
@@ -124,6 +126,7 @@ async function show(windowId: string, target: Target, mine: number) {
 
 export function hoverEnter(windowId: string, target: Target) {
   if (suppressed || hoverHeld(windowId) || sidebarSliding(windowId)) return;
+  if (!cardAllowed(target)) return hoverLeave();
   stop("show", "hide", "aim");
   card.waiting = null;
   const current = sidebarUi().hover;
@@ -161,6 +164,10 @@ export function dismissHover() {
   stop("show", "hide");
   if (sidebarUi().hover) hideCard();
 }
+
+useBrowser.subscribe((s, prev) => {
+  if (!s.settings.showTabHoverCards && prev.settings.showTabHoverCards && sidebarUi().hover?.kind === "tab") dismissHover();
+});
 
 export function dismissHoverIn(windowId: string) {
   if (owner?.windowId === windowId || sidebarUi().hover?.windowId === windowId) dismissHover();
