@@ -52,7 +52,7 @@ export async function openOverflowMenu(windowId: string) {
       children: open.map((t) => ({ value: { open: t.id }, title: tabTitle(t), checked: w.activeTabIds[w.profileId] === t.id })),
     },
     ...(synced ? [synced] : []),
-    { id: "closed", title: "Recently Closed", symbol: "clock.arrow.circlepath", enabled: closed.length > 0, children: closed.length ? closed : [{ id: "none", title: "Empty", enabled: false }] },
+    { id: "closed", title: "Recently Closed", symbol: "clock.arrow.circlepath", enabled: closed.length > 0, children: closed.length ? [...closed, sep, { id: "clearClosed", title: "Clear Recently Closed" }] : [{ id: "none", title: "Empty", enabled: false }] },
     {
       id: "cleaned",
       title: "Recently Cleaned",
@@ -82,6 +82,7 @@ export async function openOverflowMenu(windowId: string) {
   } else if (choice === "search") setSidebarUi({ searchTabs: windowId });
   else if (openSyncedTab(choice, windowId, w.profileId)) return;
   else if (choice === "restoreAll") s.restoreCleaned(undefined, windowId);
+  else if (choice === "clearClosed") s.clearRecentlyClosed(windowId);
   else if (choice === "clean") cleanUpWithUndo(windowId);
   else if (choice === "daily") s.updateSettings({ cleanUpInactiveTabsAfterMinutes: daily ? null : DAILY_CLEAN_UP_MINUTES });
   else if (choice === "mute") muteAll(windowId, !muted);

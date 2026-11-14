@@ -40,6 +40,16 @@ export function lastClosedEntry(s: BrowserState, windowId: string | null | undef
   );
 }
 
+export function withoutRecentlyClosed(s: BrowserState, windowId: string | undefined): Pick<BrowserState, "closedTabs" | "closedWindows" | "closedGroups"> {
+  const w = windowId ? s.windows[windowId] : undefined;
+  const listed = (profileId: string | undefined) => !w || w.kind === "private" || (profileId && s.profiles[profileId] ? profileId : s.settings.defaultProfileId) === w.profileId;
+  return {
+    closedTabs: s.closedTabs.filter((c) => isIncognitoProfile(c.tab.profileId) || !listed(c.tab.profileId)),
+    closedWindows: s.closedWindows.filter((c) => !listed(c.window.profileId)),
+    closedGroups: s.closedGroups.filter((c) => !(!w || w.kind === "private" || c.tabs[0]?.profileId === w.profileId)),
+  };
+}
+
 function canRestoreTabInto(s: BrowserState, c: ClosedTab, windowId: string | undefined): boolean {
   const w = windowId ? s.windows[windowId] : undefined;
   if (isIncognitoProfile(c.tab.profileId)) return c.windowId === windowId;

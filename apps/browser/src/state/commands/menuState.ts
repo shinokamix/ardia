@@ -133,6 +133,7 @@ export function menuState(s: BrowserState): MenuState {
     .slice(0, 10)
     .map(({ id, title }) => ({ id, title }));
 
+  if (!closed.length && !sidebar.recentlyClosedGroups.length) disabled.push("clearRecentlyClosed");
   return {
     checked,
     disabled,

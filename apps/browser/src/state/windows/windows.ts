@@ -29,7 +29,8 @@ import { activated, apply, removeTabs, withNewTab } from "../tabs/tabs";
 import type { AdoptId, BrowserWindow, ClosedWindow, Frame, ParkedPins, Tab, WindowKind } from "../browser/types";
 import { emptyWindow, smallWindow, withWindow } from "./newWindow";
 import { noteAutoHideTabsChosen, noteTornOffWindowKeptAutoHide } from "../telemetry/autoHideTabsChoices";
-import { lastClosedEntry, lastClosedTab, restoreTab, restoreWindow } from "./reopenClosed";
+import { lastClosedEntry, lastClosedTab, restoreTab, restoreWindow, withoutRecentlyClosed } from "./reopenClosed";
+import { noteRecentlyClosedCleared } from "../telemetry/recentlyClosedCounts";
 import { groupTree, regrouped, splitsWithin, withSplitsBack } from "./groupMoves";
 import { commonGroup, orderSections } from "../groups/groups";
 import { groupOf } from "../pins/tabGrouping";
@@ -74,6 +75,7 @@ export type WindowsSlice = {
   reopenClosedTab(windowId?: string | null): void;
   reopenClosedWindow(): void;
   restoreClosed(entryId: string, windowId?: string | null): void;
+  clearRecentlyClosed(windowId?: string | null): void;
 };
 
 function lastProfileAfterClosing(s: BrowserState, id: string): string | null {
@@ -383,5 +385,14 @@ export const createWindowsSlice: StateCreator<BrowserState, [], [], WindowsSlice
     if (closedWindow) return set(restoreWindow(s, closedWindow));
     const closedGroup = s.closedGroups.find((c) => c.id === entryId) ?? s.deletedGroups.find((c) => c.id === entryId);
     if (closedGroup) set(restoringGroup(s, closedGroup, windowId));
+  },
+
+  clearRecentlyClosed(windowId) {
+    const s = get();
+    const cleared = withoutRecentlyClosed(s, resolveWindowId(s, windowId));
+    const removed = s.closedTabs.length + s.closedWindows.length + s.closedGroups.length - cleared.closedTabs.length - cleared.closedWindows.length - cleared.closedGroups.length;
+    if (!removed) return;
+    noteRecentlyClosedCleared(removed);
+    set(cleared);
   },
 });

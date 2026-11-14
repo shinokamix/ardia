@@ -32,6 +32,9 @@ export function runSidebarCommand(command: BrowserCommand, arg: string | null, w
     case "closeAllTabs":
       closeAllTabs(windowId);
       return true;
+    case "clearRecentlyClosed":
+      s.clearRecentlyClosed(windowId);
+      return true;
     case "tidyPins":
       tidy(windowId, "pins");
       return true;
