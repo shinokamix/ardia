@@ -132,7 +132,7 @@ final class WindowManager: NSObject, NSWindowDelegate {
   ) {
     let window = entry.window, id = entry.id
     if let lights = lightsCenters[id] { ChromeWindows.setTrafficLightsCenter(lights.center, trailing: lights.trailing, in: window) }
-    window.title = title
+    Self.name(window, id: id, kind: entry.kind, title: title)
     if small, frame == nil { placeSmall(window, size: smallSize, pointer: smallPointer) } else if frame != nil || !window.isVisible { place(window, frame: frame) }
     relayoutRoot(window)
     managed[id] = entry
@@ -234,6 +234,7 @@ final class WindowManager: NSObject, NSWindowDelegate {
     guard let id = id(of: from), let entry = managed[id] else { return }
     NotificationCenter.default.removeObserver(self, name: nil, object: from)
     entry.window = to
+    Self.name(to, id: id, kind: entry.kind, title: from.title)
     if lastPlaced === from { lastPlaced = to }
     observeDelegateNotifications(to)
     observeFrame(to)
@@ -393,8 +394,14 @@ final class WindowManager: NSObject, NSWindowDelegate {
 
   func setTitle(id: String, title: String) {
     if let index = pending.firstIndex(where: { $0.id == id }) { pending[index].options.title = title }
-    guard let window = window(id), window.title != title else { return }
+    guard let entry = managed[id], entry.window.title != title || entry.window.accessibilityTitle() != title else { return }
+    Self.name(entry.window, id: id, kind: entry.kind, title: title)
+  }
+
+  private static func name(_ window: NSWindow, id: String, kind: WindowKind, title: String) {
     window.title = title
+    window.setAccessibilityTitle(title)
+    if kind == .browser { window.setAccessibilityIdentifier("ardiaBrowserWindow_\(id)") }
   }
 
   func windowShouldClose(_ sender: NSWindow) -> Bool {
