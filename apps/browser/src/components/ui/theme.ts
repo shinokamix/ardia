@@ -7,12 +7,13 @@ import { CARD_INSET, DEFAULT_SIDEBAR_WIDTH } from "../../lib/windowLayout";
 import { SIDEBAR_ROW } from "../../lib/sidebarMetrics";
 import { arcSelectedFill, colorRoles, ink, INCOGNITO_TINT, PROFILE_COLORS, radius, type ColorRoles, type ProfileColorSpec, type ShadowLevel } from "./tokens";
 import type { BasePalette } from "../../lib/themeFile";
-import { visibleSelection } from "../../lib/selectionContrast";
+import { visibleLine, visibleSelection } from "../../lib/selectionContrast";
 
 export { PROFILE_COLORS } from "./tokens";
 
 export type Theme = ColorRoles & {
   rowSelectedText: string;
+  pinnedDivider: string;
   adaptiveInk: boolean;
   profileColor: ProfileColor | "incognito";
   backdrop: BackdropTint & ThemeBackdropProps;
@@ -107,6 +108,7 @@ export function themeFor(key: string, palette?: BasePalette | null): Theme {
     theme = {
       ...base,
       rowSelectedText: base.tabSelectedText,
+      pinnedDivider: base.divider,
       adaptiveInk: false,
       profileColor: color,
       backdrop: { ...backdrop, ...PRESET_BACKDROP },
@@ -154,6 +156,7 @@ function customTheme(custom: ProfileTheme, color: ProfileColor, appDark: boolean
     theme = {
       ...preset,
       ...arcSelectionRoles(dark ? preset.palettes.dark : preset.palettes.light, windowTint, adaptiveInk),
+      pinnedDivider: visibleLine(preset.divider, inkOn(windowTint, dark), windowTint),
       adaptiveInk,
       profileColor: nearestPreset(accent),
       backdrop: {
