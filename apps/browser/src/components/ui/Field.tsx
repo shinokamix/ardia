@@ -253,7 +253,7 @@ export function Checkbox({
   size = "m",
 }: {
   value: boolean;
-  onChange?: (value: boolean) => void;
+  onChange?: (value: boolean, modifiers?: { shiftKey?: boolean }) => void;
   label?: string;
   disabled?: boolean;
   mixed?: boolean;
@@ -284,7 +284,7 @@ export function Checkbox({
   return (
     <Pressable
       disabled={disabled || !onChange}
-      onPress={() => onChange?.(!value)}
+      onPress={(e) => onChange?.(!value, e.nativeEvent as { shiftKey?: boolean })}
       onPressIn={pressMotion.onPressIn}
       onPressOut={pressMotion.onPressOut}
       style={{ flexDirection: "row", alignItems: "center", gap: space.m, opacity: disabled ? opacity.disabled : 1 }}

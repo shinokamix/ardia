@@ -35,6 +35,7 @@ export const HistoryRow = memo(function HistoryRow({
   first,
   last,
   selected,
+  highlighted,
   selecting,
   windowId,
   onToggle,
@@ -47,6 +48,7 @@ export const HistoryRow = memo(function HistoryRow({
   first: boolean;
   last: boolean;
   selected: boolean;
+  highlighted: boolean;
   selecting: boolean;
   windowId: string;
   onToggle: (url: string, shift: boolean) => void;
@@ -107,14 +109,14 @@ export const HistoryRow = memo(function HistoryRow({
             alignItems: "center",
             paddingHorizontal: space.l,
             gap: space.l,
-            backgroundColor: selected ? pagesColors(theme).rowSelected : hovered ? theme.rowHover : theme.groupFill,
+            backgroundColor: selected ? pagesColors(theme).rowSelected : hovered || highlighted ? theme.rowHover : theme.groupFill,
             borderTopLeftRadius: first ? r : 0,
             borderTopRightRadius: first ? r : 0,
             borderBottomLeftRadius: last ? r : 0,
             borderBottomRightRadius: last ? r : 0,
           }}
         >
-          <HoverSlot hovered={showControls || selecting} width={historyRow.checkbox} hover={<Checkbox value={selected} onChange={() => onToggle(entry.url, false)} />} />
+          <HoverSlot hovered={showControls || selecting} width={historyRow.checkbox} hover={<Checkbox value={selected} onChange={(_, e) => onToggle(entry.url, !!e?.shiftKey)} />} />
           <Text size="small" tone="textSecondary" style={TIME}>
             {timeLabel(entry.lastVisit)}
           </Text>
