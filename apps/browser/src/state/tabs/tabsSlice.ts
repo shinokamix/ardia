@@ -63,7 +63,7 @@ export const createTabsSlice: StateCreator<BrowserState, [], [], TabsSlice> = (s
   closedTabs: [],
 
   newTab(windowId, options) {
-    const home = options?.newTabCommand && !options.url && !options.adoptId ? customNewTabUrl(get().settings) : undefined;
+    const home = options?.newTabCommand && !options.url && !options.adoptId && !options.gated ? customNewTabUrl(get().settings) : undefined;
     if (home) return get().newTab(windowId, { ...options, url: home });
     const small = get().windows[windowId];
     if (small?.kind === "small" && small.tabIds.length) {

@@ -240,8 +240,8 @@ export function searchUrlPrefix(settings: Settings): string {
 
 export const resolveTyped = (settings: Settings, input: string): string => resolveInput(fromLegacyUrl(input.trim()), searchUrlPrefix(settings));
 
-export function customNewTabUrl(settings: Pick<Settings, "newTabOpens" | "newTabUrl">): string | undefined {
-  if (settings.newTabOpens !== "page") return undefined;
+export function customNewTabUrl(settings: Pick<Settings, "newTabOpens" | "minimalismMode" | "newTabUrl">): string | undefined {
+  if (newTabOpensOf(settings) !== "page") return undefined;
   const url = fixupUrl(fromLegacyUrl(settings.newTabUrl.trim()));
   const route = url ? appUrlRoute(url) : null;
   return url && route?.kind !== "newTab" && route?.kind !== "settings" ? url : undefined;

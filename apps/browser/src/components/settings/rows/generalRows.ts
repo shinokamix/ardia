@@ -210,7 +210,7 @@ export const generalRows = {
           title: "New tab page address",
           description: "Type an address and ⌘T, + New Tab and new windows open it instead of the New Tab page, as Chrome does with a custom New Tab page. Leave it empty for the New Tab page.",
           keywords: ["custom new tab", "new tab url", "home page", "homepage", "start page", "custom url", "cmd t"],
-          shown: (settings) => settings.newTabOpens === "page",
+          shown: (settings) => newTabOpensOf(settings) === "page",
         },
         newTabPosition: {
           title: "Add new tabs",

@@ -1,11 +1,18 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { after, test } from "node:test";
 const { useBrowser } = await import("../browser/store.ts");
 const { activeTabId } = await import("../browser/model.ts");
 const { customNewTabUrl } = await import("../settings/settings.ts");
 const { runCommand } = await import("../commands/commands.ts");
 const { settingsSnapshot } = await import("../telemetry/settingsSnapshot.ts");
 const { unshownSettings } = await import("../../components/settings/settingsIndex.ts");
+const { toggleNewTabBar } = await import("../omnibox/newTabBar.ts");
+const { registerHeroBar } = await import("../omnibox/barState.ts");
+const { startAutomation } = await import("../automation/controlSocket.ts");
+const { reloadHooks, useHookRules } = await import("../automation/hookRules.ts");
+const { approveRule, resetApprovalsForTests } = await import("../automation/approvals.ts");
+const { approvalFor } = await import("../automation/hookPolicy.ts");
+const stub = await import("../../test-native/index.ts");
 
 const S = () => useBrowser.getState();
 const shownUrl = (w) => S().tabs[activeTabId(S(), w)].url;
@@ -78,6 +85,16 @@ test("with ⌘T opening the command bar, the address is ignored and its row is h
   assert.ok(!hidden().includes("tabs.newTabUrl"));
 });
 
+test("Minimalism mode, which makes ⌘T open the command bar, ignores the address and hides its row", () => {
+  reset({ minimalismMode: true, newTabUrl: "example.com" });
+  assert.equal(customNewTabUrl(S().settings), undefined);
+  assert.equal(shownUrl(S().createWindow()), "");
+  assert.ok(hidden().includes("tabs.newTabUrl"));
+  S().updateSettings({ minimalismMode: false });
+  assert.equal(customNewTabUrl(S().settings), "https://example.com");
+  assert.ok(!hidden().includes("tabs.newTabUrl"));
+});
+
 test("the address syncs like the other New Tab settings, and telemetry gets only whether one is set", () => {
   reset({ newTabUrl: "https://secret.example.com/path" });
   const snapshot = settingsSnapshot(S().settings);
@@ -85,4 +102,68 @@ test("the address syncs like the other New Tab settings, and telemetry gets only
   assert.ok(!JSON.stringify(snapshot).includes("secret"));
   reset({ newTabUrl: "hello world" });
   assert.equal(settingsSnapshot(S().settings).custom_new_tab_url, "false");
+});
+
+test("with Reuse an empty New Tab page on, ⌘T on an empty New Tab page opens the address instead of focusing the page", () => {
+  reset({ newTabUrl: "example.com", reuseEmptyNewTab: true });
+  const w = S().createWindow({ url: "https://a.com/" });
+  const empty = S().newTab(w);
+  let focused = 0;
+  const unregister = registerHeroBar(w, empty, () => void focused++);
+  try {
+    assert.equal(toggleNewTabBar(w), false, "the empty page isn't reused while an address is set");
+    const before = S().windows[w].tabIds.length;
+    runCommand({ command: "newTab", arg: null, windowId: w });
+    assert.deepEqual([focused, S().windows[w].tabIds.length, shownUrl(w)], [0, before + 1, "https://example.com"]);
+    S().updateSettings({ newTabUrl: "" });
+    S().activate(empty);
+    assert.equal(toggleNewTabBar(w), true, "with no address, the empty page is reused as before");
+    assert.equal(focused, 1);
+  } finally {
+    unregister();
+  }
+});
+
+const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+let nextId = 0;
+function call(method, params, connection) {
+  const before = stub.controlSocket.replies.length;
+  stub.emitControlRequest({ connection, generation: stub.controlSocket.generation, line: JSON.stringify({ id: ++nextId, method, params }) });
+  return JSON.parse(stub.controlSocket.replies.slice(before).find((r) => r.connection === connection).line);
+}
+
+after(() => S().updateSettings({ cliControl: false }));
+
+test("a tab.opening hook that answers later can still cancel or redirect the address ⌘T opens", async () => {
+  const hooks = [{ name: "home", on: "tab.opening", run: ["~/bin/decide"] }];
+  reset({ newTabUrl: "https://home.example/", cliControl: true });
+  resetApprovalsForTests();
+  stub.configFolder.files.set("hooks.json", JSON.stringify({ hooks }));
+  reloadHooks();
+  startAutomation();
+  for (let i = 0; i < 5 && !stub.controlSocket.running; i++) await tick();
+  await tick();
+  approveRule(approvalFor(useHookRules.getState().hooks[0]).key);
+  const runner = 900;
+  assert.deepEqual(call("subscribe", { events: ["tab.opened"], hooks }, runner).result.served, ["home"]);
+  const w = S().createWindow({ url: "https://a.com/" });
+  const decide = (from) => stub.controlSocket.broadcasts.slice(from).map((b) => JSON.parse(b.line)).find((l) => l.decide && l.event === "tab.opening");
+
+  let from = stub.controlSocket.broadcasts.length;
+  runCommand({ command: "newTab", arg: null, windowId: w });
+  const cancelled = activeTabId(S(), w);
+  let request = decide(from);
+  assert.ok(request, "the hook is asked about the address");
+  assert.equal(S().tabs[cancelled].page.nav, undefined, "the waiting tab doesn't load the address before the hook answers");
+  call("answer", { decide: request.decide, answer: { cancel: true } }, runner);
+  await tick();
+  assert.equal(S().tabs[cancelled], undefined, "a cancel closes the waiting tab");
+
+  from = stub.controlSocket.broadcasts.length;
+  runCommand({ command: "newTab", arg: null, windowId: w });
+  const redirected = activeTabId(S(), w);
+  request = decide(from);
+  call("answer", { decide: request.decide, answer: { url: "https://elsewhere.example/" } }, runner);
+  await tick();
+  assert.equal(S().tabs[redirected].page.nav?.url, "https://elsewhere.example/", "a replacement address wins");
 });

@@ -34,7 +34,7 @@ export function settingsSnapshot(settings: Settings): Record<string, string> {
     ...out,
     ...commandBarStartFlags(settings.commandBarStart),
     unread_hidden_sites: String(Array.isArray(settings.unreadHiddenSites) ? settings.unreadHiddenSites.length : 0),
-    custom_new_tab_url: customNewTabUrl({ newTabOpens: "page", newTabUrl: typeof settings.newTabUrl === "string" ? settings.newTabUrl : "" }) ? "true" : "false",
+    custom_new_tab_url: customNewTabUrl({ newTabOpens: "page", minimalismMode: false, newTabUrl: typeof settings.newTabUrl === "string" ? settings.newTabUrl : "" }) ? "true" : "false",
   };
 }
 

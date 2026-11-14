@@ -91,7 +91,7 @@ function NewTabUrlRow() {
     setEditedFrom(saved);
     setDraft(saved);
   }
-  const invalid = !!draft.trim() && !customNewTabUrl({ newTabOpens: "page", newTabUrl: draft });
+  const invalid = !!draft.trim() && !customNewTabUrl({ newTabOpens: "page", minimalismMode: false, newTabUrl: draft });
   const save = () => {
     const value = draft.trim();
     if (value !== saved) updateSettings({ newTabUrl: value });
