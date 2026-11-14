@@ -113,7 +113,7 @@ export function LayoutStep() {
         subtitle="The command bar, for going anywhere."
         tag={tag}
         patch={{ commandBarPlacement: values.commandBarPlacement }}
-        picked={[values.commandBarPlacement === "centred" ? "⌘L opens in the centre" : "⌘L opens under the address"]}
+        picked={[values.commandBarPlacement !== "field" ? "⌘L opens in the centre" : "⌘L opens under the address"]}
         preview={preview}
       >
         <ChoiceList

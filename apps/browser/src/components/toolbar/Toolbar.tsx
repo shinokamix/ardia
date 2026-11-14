@@ -7,7 +7,8 @@ import { useTheme } from "../ui/theme";
 import { TOOLBAR_ROWS, urlFieldOf, type ToolbarRow } from "../../lib/toolbarRow";
 import { ToolbarRowContext } from "../ui/toolbarRowContext";
 import { activate } from "../../state/tabs/actions";
-import { openPanel as openWindowPanel, toggleSidebar } from "../../state/windows/actions";
+import { toggleSidebar } from "../../state/windows/actions";
+import { openBarFromAddress } from "../../state/omnibox/barState";
 import { useIsBookmarked, useSettings, useSidebarSide, useTab, useTabLayout, useTabLive, useTabsShown } from "../../state/browser/hooks";
 import type { Tab } from "../../state/browser/types";
 import { Button, ContextMenuArea, Divider, FadeLabel, font, ink, space, Symbol, Text, useHover, WindowDragRegion } from "../ui";
@@ -163,7 +164,7 @@ function useUrlField(tab: ToolbarTab, windowId: string, onFocus: () => void) {
   const hovered = pointerOver || popover === "siteControls";
   const openPanel = () => {
     onFocus();
-    openWindowPanel(windowId, tab.url);
+    openBarFromAddress(windowId, tab.url);
   };
   const toggleSiteControls = () => {
     onFocus();
