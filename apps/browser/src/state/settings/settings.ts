@@ -87,6 +87,7 @@ export const SETTING_SPECS = {
   newTabOpens: oneOf(["page", "commandBar"], "page", SYNCED),
   reuseEmptyNewTab: flag(false, SYNCED),
   warnBeforeClosingLastTab: flag(true, SYNCED),
+  keepTopAppsRunning: flag(false, SYNCED),
   undoReopensClosedTab: flag(false, SYNCED),
   warnBeforeMovingTabsToProfile: flag(true, SYNCED),
   shareTabsAcrossWindows: flag(false),

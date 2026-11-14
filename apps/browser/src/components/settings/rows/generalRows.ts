@@ -229,6 +229,11 @@ export const generalRows = {
           keywords: ["arc", "multiple windows", "same tabs", "sync windows", "shared sidebar", "unpinned"],
         },
         warnBeforeClosingLastTab: { advanced: true, title: "Warn before closing last tab in a Profile", keywords: ["confirm", "close tab"] },
+        keepTopAppsRunning: {
+          title: "Keep Top Apps running when closed",
+          description: "⌘W on a Top App switches away from it and leaves its page loaded, so a site like Slack keeps its notifications. Choose Unload from its right-click menu to put it to sleep. Off, as in Dia, ⌘W unloads it. Memory Saver can still put a page to sleep unless the site is in its Always keep these sites active list.",
+          keywords: ["top apps", "pinned tiles", "favorites", "essentials", "cmd w", "close", "unload", "keep loaded", "keep running", "background", "arc"],
+        },
         tabReorderHaptics: { advanced: true, title: "Haptic feedback when reordering tabs", keywords: ["trackpad", "vibration", "drag"] },
         extendWebsiteColor: { title: "Extend website color into tab bar", keywords: ["theme color", "tint", "colour"] },
         sidebarMediaControls: {

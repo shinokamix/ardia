@@ -153,3 +153,58 @@ test("a pinned item in the profile the window doesn't show keeps nothing open", 
   S().closeTab(only);
   assert.equal(S().windows[w], undefined);
 });
+
+const shownTab = (w) => S().tabs[activeTabId(S(), w)];
+
+test("with Keep Top Apps running on, ⌘W on a Top App switches away and leaves its page loaded; off, it unloads as before", async () => {
+  for (const keep of [true, false]) {
+    const { w, ids: [app, other] } = windowWith("app", "other");
+    S().pinTabs([app], true);
+    S().updateSettings({ keepTopAppsRunning: keep });
+    S().activate(app);
+    const closed = S().closedTabs.length;
+    await closeTab(app);
+    assert.equal(activeTabId(S(), w), other, "the regular tab comes forward");
+    assert.equal(S().tabs[app].page.kind, keep ? "loaded" : "asleep");
+    assert.equal(S().closedTabs.length, closed + (keep ? 0 : 1), "nothing closed, nothing to reopen");
+  }
+  S().updateSettings({ keepTopAppsRunning: false });
+});
+
+test("holding ⌘W with Top Apps kept running ends on a New Tab and never cycles through the tiles", async () => {
+  const { w, ids: [a, b, r1] } = windowWith("a", "b", "r1", "r2");
+  S().pinTabs([a, b], true);
+  S().updateSettings({ keepTopAppsRunning: true });
+  S().activate(a);
+  const visited = [];
+  for (let i = 0; i < 8; i++) {
+    const t = shownTab(w);
+    visited.push(t.pin ? t.url : t.url || "new");
+    await closeTab(t.id);
+    assert.ok(S().windows[w], `the window stays (step ${i})`);
+  }
+  assert.equal(shownTab(w).url, "", "a New Tab is in front");
+  assert.equal(shownTab(w).pin, null);
+  assert.ok(visited.filter((u) => u === "https://a.com/" || u === "https://b.com/").length <= 2, `each tile shows at most once: ${visited}`);
+  assert.equal(S().tabs[a].page.kind, "loaded");
+  assert.equal(S().tabs[b].page.kind, "loaded");
+  assert.ok(r1);
+  S().updateSettings({ keepTopAppsRunning: false });
+});
+
+test("Unload on a kept-running Top App puts it to sleep, and a tile in a split leaves the split loaded", () => {
+  const { w, ids: [app, other] } = windowWith("app", "other");
+  S().pinTabs([app], true);
+  S().updateSettings({ keepTopAppsRunning: true });
+  S().activate(app);
+  S().closeTabs([app], { keepTopApps: false });
+  assert.equal(S().tabs[app].page.kind, "asleep");
+  assert.equal(activeTabId(S(), w), other);
+  S().activate(app);
+  S().createSplit([app, other]);
+  S().closeTabs([app]);
+  assert.equal(S().tabs[app].page.kind, "loaded", "the tile keeps its page");
+  assert.equal(Object.keys(S().splits).length, 0, "and leaves the split");
+  assert.equal(activeTabId(S(), w), other);
+  S().updateSettings({ keepTopAppsRunning: false });
+});

@@ -22,6 +22,9 @@ import { openMultiMenu } from "./multiTabMenu";
 import { tileFolderOf } from "../pins/tileFolders";
 import { sendTabFromMenu, sendTabMenuItem } from "../sync/menu";
 import { pageUnread } from "../tabs/unread";
+import { hasPage } from "../tabs/pageSession";
+import { closeIntent } from "../tabs/tabs";
+import { noteTopAppUnloadedFromMenu } from "../telemetry/tabSleepCounts";
 import { ALL_UNREAD_TITLE, canChooseSiteUnread, isUnreadSiteHidden, showUnreadCounts, toggleSiteUnread, unreadSiteTitle } from "../tabs/unreadSites";
 
 const store = () => useBrowser.getState();
@@ -136,8 +139,14 @@ function unreadItems(s: BrowserState, tab: Tab): MenuItem[] {
   return [{ id: "siteUnread", title: unreadSiteTitle(hidden), symbol: "app.badge" }];
 }
 
-function closeItems(f: Facts): MenuItem[] {
-  if (f.housed) return [];
+function unloadTopApp(tabId: string) {
+  const s = store();
+  noteTopAppUnloadedFromMenu();
+  s.closeTabs(closeIntent(s, tabId).ids, { keepTopApps: false });
+}
+
+function closeItems(s: BrowserState, tab: Tab, f: Facts): MenuItem[] {
+  if (f.housed) return f.section === "tile" && s.settings.keepTopAppsRunning && hasPage(tab) ? [{ id: "unloadTopApp", title: "Unload", symbol: "moon.zzz" }] : [];
   return [
     { id: "close", title: "Close", symbol: "xmark", ...hintWhen(f.active, "closeTab") },
     ...(f.split ? [{ id: "closeSplit", title: "Close Split View" }] : []),
@@ -184,7 +193,7 @@ export function tabMenuItems(s: BrowserState, windowId: string, tab: Tab, f: Fac
       ...muteItems(s, tab),
       ...unreadItems(s, tab),
     ],
-    closeItems(f),
+    closeItems(s, tab, f),
   );
 }
 
@@ -247,6 +256,7 @@ function runTabChoice(windowId: string, tab: Tab, f: Facts, choice: string | Des
   else if (choice === "copyMd") copyUrls([tab.id], true);
   else if (choice === "bookmark") bookmarkTab(windowId, tab.id);
   else if (choice === "close") void closeTab(tab.id);
+  else if (choice === "unloadTopApp") unloadTopApp(tab.id);
   else if (choice === "closeSplit" && f.split) closeSplitView(f.split.id);
   else if (choice === "closeOthers") s.closeTabs(f.others);
   else if (choice === "closeAbove") s.closeTabs(f.above);
