@@ -256,6 +256,7 @@ function SitePermissions({ shownProfileId, site }: { shownProfileId: string | nu
   const [loaded, reload] = useResource(siteOrigins, currentEngineProfile(profileId));
   const origins = loaded ?? null;
   const refresh = () => void reload();
+  const blockNotificationRequests = useSettings((s) => s.blockNotificationRequests);
   useEffect(() => {
     if (!site) return;
     const siteProfileId = shownProfileId ?? profileId;
@@ -274,6 +275,7 @@ function SitePermissions({ shownProfileId, site }: { shownProfileId: string | nu
         action={<ProfilePicker value={profileId} onChange={setProfileId} />}
       />
       <Group>
+        <Row anchor="privacy.blockNotificationRequests"><Toggle value={blockNotificationRequests} onChange={(v) => updateSettings({ blockNotificationRequests: v })} /></Row>
         {origins === null ? (
           <Row title=" " description=" " />
         ) : origins.length === 0 ? (

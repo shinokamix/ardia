@@ -25,6 +25,7 @@ export const privacyRows = {
           description: "Pop-ups, camera, location, notifications and other permissions you've set for sites.",
           keywords: ["camera", "microphone", "location", "popups", "cookies", "javascript", "clear site data", "website settings"],
         },
+        blockNotificationRequests: { title: "Block requests to send notifications", description: "Sites you already allowed keep sending them. Allow another site from its Site Controls.", keywords: ["push notifications", "notification prompts", "notification requests", "stop asking", "notification spam"] },
       },
     },
     { section: "Apps allowed to open links", rows: { appLinks: { advanced: true, title: "Apps allowed to open links", description: "Sites that open another app without asking first.", keywords: ["external apps", "protocol handlers", "zoom links"] } } },
