@@ -10,6 +10,8 @@ import { MiniWindow } from "../MiniWindow";
 import { PictureChoice } from "../PictureChoice";
 import { AmountSlider } from "../ThemeControls";
 import { PAGE_FRAME } from "../../../lib/windowLayout";
+import { TAB_CORNERS } from "../../../lib/tabCorners";
+import { useBasePalette } from "../../../state/config/basePalette";
 import { BookmarksBarSection } from "./BookmarksBarSection";
 import { modePreview, stylePreview } from "../tokens";
 import { useSettingsColors } from "../useSettingsColors";
@@ -172,6 +174,7 @@ function PageFramePicker() {
   const borderless = useSettings((s) => s.borderlessMode);
   const zeroInFullScreen = useSettings((s) => s.pageFrameZeroInFullScreen);
   const zeroWhenTabsHidden = useSettings((s) => s.pageFrameZeroWhenTabsHidden);
+  const corners = useBasePalette((s) => s.look.radii.chrome);
   return (
     <>
       <SectionHeader title="Page Frame" />
@@ -186,6 +189,16 @@ function PageFramePicker() {
             </View>
             <Text size="small" tone="textSecondary" style={{ width: FRAME_VALUE_WIDTH, textAlign: "right" }}>
               {frame === 0 ? "None" : `${frame} pt`}
+            </Text>
+          </Box>
+        </Row>
+        <Row anchor="appearance.tabCornerRadius">
+          <Box row gap="m" style={FRAME_CONTROL}>
+            <View style={{ width: FRAME_SLIDER_WIDTH }}>
+              <AmountSlider value={corners / TAB_CORNERS.max} tooltip={`${corners} pt`} onChange={(v) => updateSettings({ tabCornerRadius: Math.round(v * TAB_CORNERS.max) })} />
+            </View>
+            <Text size="small" tone="textSecondary" style={{ width: FRAME_VALUE_WIDTH, textAlign: "right" }}>
+              {corners === 0 ? "Square" : `${corners} pt`}
             </Text>
           </Box>
         </Row>

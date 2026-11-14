@@ -17,6 +17,7 @@ import type { StateCreator } from "zustand";
 import { fromLegacyUrl } from "../../lib/legacy";
 import type { BrowserState } from "../browser/store";
 import { DEFAULT_SIDEBAR_WIDTH, PAGE_FRAME, validPageFrame } from "../../lib/windowLayout";
+import { TAB_CORNERS, validTabCorners } from "../../lib/tabCorners";
 import { isFields, isString, isStringList } from "../../lib/decode";
 import type { SavedObject } from "../../lib/savedDocument";
 import type { JsonSchema } from "../../lib/jsonSchema";
@@ -142,6 +143,7 @@ export const SETTING_SPECS = {
   compactToolbar: flag(false, SYNCED),
   pageFrame: shaped<number>(PAGE_FRAME.default, validPageFrame, { type: "integer", minimum: PAGE_FRAME.min, maximum: PAGE_FRAME.max }, SYNCED),
   borderlessMode: flag(false, SYNCED),
+  tabCornerRadius: shaped<number | null>(null, validTabCorners, { type: ["integer", "null"], minimum: TAB_CORNERS.min, maximum: TAB_CORNERS.max }, SYNCED),
   minimalismMode: flag(false, SYNCED),
   pageFrameZeroInFullScreen: flag(false, SYNCED),
   pageFrameZeroWhenTabsHidden: flag(false, SYNCED),
